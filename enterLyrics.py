@@ -19,7 +19,7 @@ class Ui_Dialog(object):
         font.setPointSize(15)
         Dialog.setFont(font)
         self.label = QtWidgets.QLabel(Dialog)
-        self.label.setGeometry(QtCore.QRect(280, -9, 141, 41))
+        self.label.setGeometry(QtCore.QRect(270, -7, 181, 41))
         self.label.setObjectName("label")
         self.textEdit = QtWidgets.QTextEdit(Dialog)
         self.textEdit.setGeometry(QtCore.QRect(3, 29, 681, 541))
