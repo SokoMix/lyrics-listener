@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets
 from abc import ABCMeta, abstractmethod
 
 class ITextCatcher():
-    _metaclass_ = ABCMeta
+    __metaclass__ = ABCMeta
 
     def __init__(self):
         super().__init__()
@@ -46,6 +46,7 @@ class PresenterTextCatcher():
             self.iTextCatcher.hideView()
             self.presenterLoadView.hideView()
             self.presenterLoadView.showBtn()
+            self.presenterLoadView.showCmbMain()
         else:
             self.iTextCatcher.handleErrorInput()
         pass

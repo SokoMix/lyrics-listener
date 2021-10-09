@@ -1,4 +1,5 @@
 import loadLyrics
+import sounddevice as sd
 from PyQt5 import QtWidgets
 from abc import ABCMeta, abstractmethod
 
@@ -59,7 +60,16 @@ class PresenterLoadView():
             self.model.setTextLyr(text)
             self.hideView()
             self.presenterMainV.showBtn()
+            self.showCmbMain()
         pass
+
+    def showCmbMain(self):
+        self.presenterMainV.showCmb()
+        self.presenterMainV.clearCmb()
+        self.presenterMainV.addItemInCmb('Выберите аудиоустройство для записи')
+        devices = sd.query_devices()
+        for items in devices:
+            self.presenterMainV.addItemInCmb(items['name'])
 
     def onViewLoaded(self):
         self.iLoadView.setTitle("Загрузить стих")
