@@ -2,12 +2,14 @@ import vosk
 import queue
 import json
 import sounddevice
-import threading
 
 
 class VoskApi:
 
     id = 0
+    isPause = False
+    isStop = False
+    said = ''
 
     def __init__(self, device_id):
         super().__init__()
@@ -15,17 +17,14 @@ class VoskApi:
         pass
 
     def stop(self):
-        global isStop
-        isStop = True
+        self.isStop = True
         pass
 
     def pause(self):
-        global isPause
-        isPause = True
+        self.isPause = True
 
     def resume(self):
-        global isPause
-        isPause = False
+        self.isPause = False
 
     def get_said(self):
         return self.said
@@ -35,25 +34,19 @@ class VoskApi:
 
     def startLis(self):
         q = queue.Queue()
-        global isStop
-        global isPause
-        isStop = False
-        isPause = False
+        self.isStop = False
+        self.isPause = False
         self.said = ''
         samplerate = int(sounddevice.query_devices(self.id, 'input')['default_samplerate'])
-        model = vosk.Model(r"vosk-model-small-ru-0.15")
+        model = vosk.Model(r"VoskApi/vosk-model-ru-0.10")
         with sounddevice.RawInputStream(samplerate=samplerate, blocksize=16000, device=self.id, dtype='int16', channels=1,
                                callback=(lambda i, f, t, s: q.put(bytes(i)))):
             rec = vosk.KaldiRecognizer(model, samplerate)
-            while threading.active_count()==2:
-                while not isStop:
-                    data = q.get()
-                    if rec.AcceptWaveform(data):
-                        data = json.loads(rec.Result())["text"]
-                        if not isPause:
-                            self.said += data+' '
-                            print(data)
-                if isStop:
+            while not self.isStop:
+                data = q.get()
+                if rec.AcceptWaveform(data):
+                    data = json.loads(rec.Result())["text"]
+                    if not self.isPause:
+                        self.said += data+' '
                     print(self.said)
-                    return self.said
         pass

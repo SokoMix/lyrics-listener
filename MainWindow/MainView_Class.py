@@ -1,9 +1,7 @@
-import mainwindow
-import sounddevice as sd
-from threading import Thread
-# import asyncio
-from PyQt5 import QtWidgets, QtCore
+from MainWindow import MainView_GUI
+from PyQt5 import QtWidgets, QtCore, QtGui
 from abc import ABCMeta, abstractmethod
+import sounddevice as sd
 
 
 class IMainView():
@@ -88,6 +86,14 @@ class IMainView():
     def clearCmb(self):
         pass
 
+    @abstractmethod
+    def showRes(self, output):
+        pass
+
+    @abstractmethod
+    def unlock(self):
+        pass
+
 
 class PresenterMainView():
 
@@ -101,12 +107,15 @@ class PresenterMainView():
         self.stopTimer = False
         self.hh, self.mm, self.ss = [0]*3
 
+    def onShowResClicked(self):
+        self.model.checkResult()
+        self.iMainView.showRes(self.model.getSimilarity())
+
     def setPresenterLoad(self, presenter):
         self.presenterLoadView = presenter
 
     def startListen(self):
-        thr1 = Thread(target=self.model.startListen, args=())
-        thr1.start()
+        self.model.startListen()
         pass
 
     def stopTime(self):
@@ -133,6 +142,20 @@ class PresenterMainView():
 
     def moveTime(self):
         self.iMainView.moveTime()
+
+    def configCmb(self):
+        self.iMainView.showCmb()
+        self.iMainView.clearCmb()
+        self.iMainView.addItemInCmb('Выберите аудиоустройство для записи')
+        devices = sd.query_devices()
+        input_devices = []
+        id = 0
+        for items in devices:
+            if items['max_input_channels'] > 0:
+                input_devices.append(id)
+                self.iMainView.addItemInCmb(items['name'])
+            id += 1
+        self.model.setInputDevices(input_devices)
 
     def showCmb(self):
         self.iMainView.showCmb()
@@ -182,7 +205,10 @@ class PresenterMainView():
     def resumeListen(self):
         self.model.resumeListen()
 
-class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
+    def unlock(self):
+        self.iMainView.unlock()
+
+class MainView(QtWidgets.QMainWindow, MainView_GUI.Ui_MainWindow, IMainView):
     def __init__(self, model):
         super().__init__()
         self.model = model
@@ -197,7 +223,14 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
         self.stopBtn.clicked.connect(self.onStopClicked)
         self.pauseBtn.clicked.connect(self.onPauseClicked)
         self.recBtn.clicked.connect(self.onRecBtnClicked)
-        self.playBtn.clicked.connect(self.onPlayBtnClicked)
+        self.continueBtn.clicked.connect(self.onContinueBtnClicked)
+
+    def unlock(self):
+        self.setDisabled(False)
+
+    def closeEvent(self, e):
+        self.presenterMainView.stopListen()
+        exit(0)
 
     def onStopClicked(self):
         self.presenterMainView.showResBtn()
@@ -210,10 +243,13 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
     def resumeTimer(self):
         self.timer.start()
 
-    def onPlayBtnClicked(self):
+    def onContinueBtnClicked(self):
         self.resumeTimer()
         self.presenterMainView.resumeTimerTag()
         self.presenterMainView.resumeListen()
+        self.loadBtn.setDisabled(True)
+        self.continueBtn.setDisabled(True)
+        self.pauseBtn.setDisabled(False)
 
     def stopTimer(self):
         self.timer.stop()
@@ -225,6 +261,9 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
         self.tEdit.setGeometry(430, 410, 131, 31)
 
     def onPauseClicked(self):
+        self.loadBtn.setDisabled(False)
+        self.continueBtn.setDisabled(False)
+        self.pauseBtn.setDisabled(True)
         self.presenterMainView.stopTimerTag()
         self.presenterMainView.pauseListen()
 
@@ -237,6 +276,10 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
         self.presenterMainView.timerContinue()
         self.presenterMainView.onRecBtnClicked()
         self.presenterMainView.startListen()
+        self.loadBtn.setDisabled(True)
+        self.pauseBtn.setDisabled(False)
+        self.stopBtn.setDisabled(False)
+        self.continueBtn.setDisabled(True)
 
     def updateTime(self):
         self.presenterMainView.onRecBtnClicked()
@@ -254,7 +297,11 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
         self.presenterMainView.setPresenterLoad(pres)
 
     def onViewLoaded(self):
-        self.setWindowTitle('Проверить стих')
+        self.setWindowTitle('Lyrics Listener')
+        self.setWindowIcon(QtGui.QIcon('Images/icon_LyrLis.png'))
+        self.pauseBtn.setDisabled(True)
+        self.stopBtn.setDisabled(True)
+        self.continueBtn.setDisabled(True)
         self.hideButtonStartListen()
         self.hideBtnShowResult()
         self.hideCmb()
@@ -283,7 +330,7 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
     def hideListenBar(self):
         self.recBtn.hide()
         self.pauseBtn.hide()
-        self.playBtn.hide()
+        self.continueBtn.hide()
         self.stopBtn.hide()
 
     def hideTime(self):
@@ -292,11 +339,12 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
     def showListenBar(self):
         self.recBtn.show()
         self.pauseBtn.show()
-        self.playBtn.show()
+        self.continueBtn.show()
         self.stopBtn.show()
         self.tEdit.show()
 
     def onLoadBtnClicked(self):
+        self.setDisabled(True)
         self.presenterMainView.openLyricsView()
         pass
 
@@ -321,4 +369,8 @@ class MainView(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow, IMainView):
         return self.presenterMainView
 
     def onShowResClicked(self):
+        self.presenterMainView.onShowResClicked()
         pass
+
+    def showRes(self, output):
+        QtWidgets.QMessageBox.information(self, 'Результат', 'Оценка по десятибальной шкале: '+str(output))
