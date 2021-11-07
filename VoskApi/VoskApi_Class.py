@@ -38,7 +38,7 @@ class VoskApi:
         self.isPause = False
         self.said = ''
         samplerate = int(sounddevice.query_devices(self.id, 'input')['default_samplerate'])
-        model = vosk.Model(r"VoskApi/vosk-model-ru-0.10")
+        model = vosk.Model(r"VoskApi/vosk-model-ru")
         with sounddevice.RawInputStream(samplerate=samplerate, blocksize=16000, device=self.id, dtype='int16', channels=1,
                                callback=(lambda i, f, t, s: q.put(bytes(i)))):
             rec = vosk.KaldiRecognizer(model, samplerate)

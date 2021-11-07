@@ -31,7 +31,7 @@
 
 ## Launching the program
 
-> For launch you need to run MainEngine.py in your ide or write in command line next command:
+> For launch you need to download vosk model from https://alphacephei.com/vosk/models website, copy model files to VoskApi/vosk-model-ru and run MainEngine.py in your IDE or write in command line (you need to go to the app catalog) next command:
 
 ```python MainEngine.py```
 

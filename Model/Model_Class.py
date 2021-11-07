@@ -2,7 +2,7 @@ import sys
 from threading import Thread
 from VoskApi.VoskApi_Class import VoskApi
 from pymystem3 import Mystem
-sys.path.append('../Lib/cpp_text_check.cpython-39-x86_64-linux-gnu.so')
+sys.path.append('../Lib')
 from Lib import cpp_text_check
 
 
