@@ -41,7 +41,7 @@ class PresenterLoadView():
         self.iLoadView = iLoadView
         self.presenterTextCatcher = None
         self.presenterMainV = None
-        self.isOpenCmb = False
+        self.isShowedChoiceBtns = False
 
     def setPresenterTextCatcher(self, pres):
         self.presenterTextCatcher = pres
@@ -70,10 +70,13 @@ class PresenterLoadView():
             text = text.replace('\n', ' ')
             self.model.setTextLyr(text)
             self.hideView()
-            if not self.isOpenCmb:
-                self.presenterMainV.showBtn()
-                self.showCmbMain()
-                self.isOpenCmb = True
+            if not self.isShowedChoiceBtns:
+                self.showChoiceBtnsMain()
+                self.isShowedChoiceBtns = True
+
+    def showChoiceBtnsMain(self):
+        self.presenterMainV.showChoiceBtns()
+        self.presenterMainV.showTable()
 
     def showCmbMain(self):
         self.presenterMainV.configCmb()

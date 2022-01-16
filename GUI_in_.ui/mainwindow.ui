@@ -22,7 +22,7 @@
    <widget class="QPushButton" name="loadBtn">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>340</x>
       <y>70</y>
       <width>271</width>
       <height>51</height>
@@ -84,7 +84,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>../buttons_py/rec_but.png</normaloff>../buttons_py/rec_but.png</iconset>
+      <normaloff>../Images/Buttons/rec_but.png</normaloff>../Images/Buttons/rec_but.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -110,7 +110,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>../buttons_py/pause_but.png</normaloff>../buttons_py/pause_but.png</iconset>
+      <normaloff>../Images/Buttons/pause_but.png</normaloff>../Images/Buttons/pause_but.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -122,7 +122,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="playBtn">
+   <widget class="QPushButton" name="continueBtn">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -136,7 +136,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>../buttons_py/play_but.png</normaloff>../buttons_py/play_but.png</iconset>
+      <normaloff>../Images/Buttons/play_but.png</normaloff>../Images/Buttons/play_but.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -162,7 +162,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>../buttons_py/stop_but.png</normaloff>../buttons_py/stop_but.png</iconset>
+      <normaloff>../Images/Buttons/stop_but.png</normaloff>../Images/Buttons/stop_but.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -224,7 +224,7 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>155</y>
+      <y>154</y>
       <width>631</width>
       <height>36</height>
      </rect>
@@ -252,6 +252,210 @@
       <string>Выберите аудиоустройство для записи</string>
      </property>
     </item>
+   </widget>
+   <widget class="QPushButton" name="liveListenBtn">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>260</y>
+      <width>271</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Прослушивание речи</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="fileListenBtn">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>260</y>
+      <width>271</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Загрузка аудиофайлов</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="loadFileBtn">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>140</y>
+      <width>271</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Выбрать файлы</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="rdBtnTable">
+    <property name="geometry">
+     <rect>
+      <x>259</x>
+      <y>140</y>
+      <width>431</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Выберите язык</string>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+    <widget class="QRadioButton" name="engBtn">
+     <property name="geometry">
+      <rect>
+       <x>7</x>
+       <y>46</y>
+       <width>211</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Английский</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../Images/Languages/ENG.jpg</normaloff>../Images/Languages/ENG.jpg</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rusBtn">
+     <property name="geometry">
+      <rect>
+       <x>232</x>
+       <y>46</y>
+       <width>171</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Русский</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../Images/Languages/RUS.jpg</normaloff>../Images/Languages/RUS.jpg</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="checkFileRes">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>450</y>
+      <width>271</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Сравнить данные</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="handleLbl">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>400</y>
+      <width>331</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 201, 38);</string>
+    </property>
+    <property name="text">
+     <string>Выполняется обработка речи</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="readyLbl">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>400</y>
+      <width>191</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(25, 255, 25);</string>
+    </property>
+    <property name="text">
+     <string>Речь обработана</string>
+    </property>
    </widget>
   </widget>
  </widget>

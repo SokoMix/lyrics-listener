@@ -1,7 +1,11 @@
-from MainWindow import MainView_GUI
+from MainWindow import MVtest
 from PyQt5 import QtWidgets, QtCore, QtGui
 from abc import ABCMeta, abstractmethod
+from pydub import AudioSegment
+from threading import Thread
+from PyQt5.QtCore import pyqtSignal
 import sounddevice as sd
+import os
 
 
 class IMainView():
@@ -59,6 +63,22 @@ class IMainView():
         pass
 
     @abstractmethod
+    def hideReadyLbl(self):
+        pass
+
+    @abstractmethod
+    def showReadyLbl(self):
+        pass
+
+    @abstractmethod
+    def hideHandleLbl(self):
+        pass
+
+    @abstractmethod
+    def showHandleLbl(self):
+        pass
+
+    @abstractmethod
     def displayTime(self, hh, mm, ss):
         pass
 
@@ -94,18 +114,77 @@ class IMainView():
     def unlock(self):
         pass
 
+    @abstractmethod
+    def getLang(self):
+        pass
+
+    @abstractmethod
+    def showChoiceBtns(self):
+        pass
+
+    @abstractmethod
+    def hideChoiceBtns(self):
+        pass
+
+    @abstractmethod
+    def showLoadFileBtn(self):
+        pass
+
+    @abstractmethod
+    def catalogExecute(self):
+        pass
+
+    @abstractmethod
+    def hideTable(self):
+        pass
+
+    @abstractmethod
+    def showTable(self):
+        pass
+
+    @abstractmethod
+    def showFileResBtn(self):
+        pass
+
+    @abstractmethod
+    def disableLoadBtns(self):
+        pass
+
+    @abstractmethod
+    def enableLoadBtns(self):
+        pass
 
 class PresenterMainView():
 
     isPressedPlay = False
+    res_sig = None
 
-    def __init__(self, iMainView: IMainView, model):
+    def __init__(self, iMainView: IMainView, model, sig):
         super().__init__()
         self.model = model
+        self.res_sig = sig
         self.iMainView = iMainView
         self.presenterLoadView = None
+        self.resultPres = None
         self.stopTimer = False
         self.hh, self.mm, self.ss = [0]*3
+        self.catalogAudio = None
+
+    def hideTable(self):
+        self.iMainView.hideTable()
+
+    def setResultPres(self, resv):
+        self.resultPres = resv
+
+    def finishHandle(self):
+        self.iMainView.hideHandleLbl()
+        self.iMainView.showReadyLbl()
+
+    def showTable(self):
+        self.iMainView.showTable()
+
+    def setCatalogAudio(self, path):
+        self.catalogAudio = path
 
     def onShowResClicked(self):
         self.model.checkResult()
@@ -116,7 +195,6 @@ class PresenterMainView():
 
     def startListen(self):
         self.model.startListen()
-        pass
 
     def stopTime(self):
         self.iMainView.stopTimer()
@@ -174,6 +252,11 @@ class PresenterMainView():
     def onViewLoaded(self):
         self.iMainView.onViewLoaded()
 
+    def saveLang(self):
+        lang = self.iMainView.getLang()
+        self.model.setLang(lang)
+        self.iMainView.hideTable()
+
     def stopTimerTag(self):
         self.stopTimer = True
 
@@ -208,11 +291,54 @@ class PresenterMainView():
     def unlock(self):
         self.iMainView.unlock()
 
-class MainView(QtWidgets.QMainWindow, MainView_GUI.Ui_MainWindow, IMainView):
+    def onLiveListenBtnClicked(self):
+        self.iMainView.showCmb()
+        self.iMainView.showButtonStartListen()
+        self.iMainView.hideChoiceBtns()
+        self.configCmb()
+
+    def onFileListenBtnClicked(self):
+        self.iMainView.showLoadFileBtn()
+
+    def showChoiceBtns(self):
+        self.iMainView.showChoiceBtns()
+
+    def onLoadFileBtnClicked(self):
+        dir = self.iMainView.catalogExecute()
+        if dir != '':
+            self.setCatalogAudio(dir)
+            files = os.listdir(self.catalogAudio)
+            for i in range(len(files)):
+                files[i] = self.catalogAudio+'/'+files[i]
+            for i in range(len(files)):
+                if files[i][-3:]!='wav':
+                    sound = AudioSegment.from_file(files[i])
+                    files[i] = files[i][:-3]+'wav'
+                    sound.export(files[i], format="wav")
+            self.model.setAudioFiles(files)
+            self.iMainView.showFileResBtn()
+
+    def sig_showFiles(self):
+        self.resultPres.showFiles()
+        self.iMainView.enableLoadBtns()
+
+    def checkFilesRes(self):
+        self.iMainView.disableLoadBtns()
+        self.iMainView.hideReadyLbl()
+        self.iMainView.showHandleLbl()
+        self.res_sig.connect(self.sig_showFiles)
+        thr2 = Thread(target=self.model.startListenFiles, args=(self, self.res_sig, ))
+        thr2.start()
+
+
+class MainView(QtWidgets.QMainWindow, MVtest.Ui_MainWindow, IMainView):
+
+    res_sig = pyqtSignal()
+
     def __init__(self, model):
         super().__init__()
         self.model = model
-        self.presenterMainView = PresenterMainView(self, self.model)
+        self.presenterMainView = PresenterMainView(self, self.model, self.res_sig)
         self.setupUi(self)
         self.show()
         self.presenterMainView.onViewLoaded()
@@ -224,9 +350,68 @@ class MainView(QtWidgets.QMainWindow, MainView_GUI.Ui_MainWindow, IMainView):
         self.pauseBtn.clicked.connect(self.onPauseClicked)
         self.recBtn.clicked.connect(self.onRecBtnClicked)
         self.continueBtn.clicked.connect(self.onContinueBtnClicked)
+        self.liveListenBtn.clicked.connect(self.onLiveListenBtnClicked)
+        self.fileListenBtn.clicked.connect(self.onFileListenBtnClicked)
+        self.loadFileBtn.clicked.connect(self.onLoadFileBtnClicked)
+        self.checkFileRes.clicked.connect(self.onCheckFileResClicked)
+
+    def onCheckFileResClicked(self):
+        self.presenterMainView.checkFilesRes()
+
+    def catalogExecute(self):
+        dir = QtWidgets.QFileDialog.getExistingDirectory(self, "Выбрать папку", ".")
+        return dir
+
+    def setResPres(self, resv):
+        self.presenterMainView.setResultPres(resv)
+
+    def hideTable(self):
+        self.rdBtnTable.hide()
+        pass
+
+    def showTable(self):
+        self.rdBtnTable.show()
+        pass
+
+    def showFileResBtn(self):
+        self.checkFileRes.show()
+        pass
+
+    def disableLoadBtns(self):
+        self.loadBtn.setDisabled(True)
+        self.loadFileBtn.setDisabled(True)
+
+    def enableLoadBtns(self):
+        self.loadBtn.setDisabled(False)
+        self.loadFileBtn.setDisabled(False)
+
+    def onLoadFileBtnClicked(self):
+        self.presenterMainView.onLoadFileBtnClicked()
+
+    def onFileListenBtnClicked(self):
+        self.presenterMainView.onFileListenBtnClicked()
+        self.presenterMainView.saveLang()
+
+    def onLiveListenBtnClicked(self):
+        self.presenterMainView.onLiveListenBtnClicked()
+        self.presenterMainView.saveLang()
+
+    def showChoiceBtns(self):
+        self.liveListenBtn.show()
+        self.fileListenBtn.show()
+
+    def hideChoiceBtns(self):
+        self.liveListenBtn.hide()
+        self.fileListenBtn.hide()
 
     def unlock(self):
         self.setDisabled(False)
+
+    def getLang(self):
+        if self.rusBtn.isChecked():
+            return 'rus'
+        else:
+            return 'eng'
 
     def closeEvent(self, e):
         self.presenterMainView.stopListen()
@@ -268,7 +453,13 @@ class MainView(QtWidgets.QMainWindow, MainView_GUI.Ui_MainWindow, IMainView):
         self.presenterMainView.pauseListen()
 
     def moveLoadBtn(self):
-        self.loadBtn.setGeometry(340, 70,271, 51)
+        self.loadBtn.setGeometry(340, 70, 271, 51)
+
+    def showLoadFileBtn(self):
+        self.moveLoadBtn()
+        self.hideChoiceBtns()
+        self.loadFileBtn.setGeometry(340, 140, 271, 51)
+        self.loadFileBtn.show()
 
     def onRecBtnClicked(self):
         self.timer.start()
@@ -296,21 +487,35 @@ class MainView(QtWidgets.QMainWindow, MainView_GUI.Ui_MainWindow, IMainView):
     def setPres(self, pres):
         self.presenterMainView.setPresenterLoad(pres)
 
+    def hideReadyLbl(self):
+        self.readyLbl.hide()
+
+    def showReadyLbl(self):
+        self.readyLbl.show()
+
+    def hideHandleLbl(self):
+        self.handleLbl.hide()
+
+    def showHandleLbl(self):
+        self.handleLbl.show()
+
     def onViewLoaded(self):
         self.setWindowTitle('Lyrics Listener')
         self.setWindowIcon(QtGui.QIcon('Images/icon_LyrLis.png'))
         self.pauseBtn.setDisabled(True)
         self.stopBtn.setDisabled(True)
         self.continueBtn.setDisabled(True)
+        self.fileListenBtn.hide()
+        self.loadFileBtn.hide()
+        self.liveListenBtn.hide()
         self.hideButtonStartListen()
         self.hideBtnShowResult()
         self.hideCmb()
         self.hideListenBar()
         self.hideTime()
-        self.configCmb()
-
-    def configCmb(self):
-        self.cmb.setEditable(False)
+        self.hideTable()
+        self.hideHandleLbl()
+        self.hideReadyLbl()
 
     def hideCmb(self):
         self.cmb.hide()
@@ -353,6 +558,7 @@ class MainView(QtWidgets.QMainWindow, MainView_GUI.Ui_MainWindow, IMainView):
 
     def hideBtnShowResult(self):
         self.showResBtn.hide()
+        self.checkFileRes.hide()
 
     def onStartListenBtnClicked(self):
         self.moveLoadBtn()

@@ -46,10 +46,9 @@ class PresenterTextCatcher():
             self.model.setTextLyr(txt.replace('\n', ' '))
             self.iTextCatcher.hideView()
             self.presenterLoadView.hideView()
-            if not self.presenterLoadView.isOpenCmb:
-                self.presenterLoadView.showBtn()
-                self.presenterLoadView.showCmbMain()
-                self.presenterLoadView.isOpenCmb = True
+            if not self.presenterLoadView.isShowedChoiceBtns:
+                self.presenterLoadView.showChoiceBtnsMain()
+                self.presenterLoadView.isShowedChoiceBtns = True
             self.presenterLoadView.unlockWithMain()
         else:
             self.iTextCatcher.handleErrorInput()

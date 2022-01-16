@@ -16,6 +16,20 @@ class Model(object):
         self.isLisStarted = False
         self.voskApi = None
         self.inputDevices = None
+        self.audioFiles = None
+        self.lang = None
+
+    def setAudioFiles(self, list):
+        self.audioFiles = list
+
+    def getAudioFiles(self):
+        return self.audioFiles
+
+    def setLang(self, st):
+        self.lang = st
+
+    def getLang(self):
+        return self.lang
 
     def setInputDevices(self, list):
         self.inputDevices = list
@@ -24,15 +38,33 @@ class Model(object):
         self.text_lyrics = txt
 
     def setDeviceId(self, id):
-        self.voskApi = VoskApi(max(0, self.inputDevices[id - 1]))
+        self.voskApi = VoskApi(max(0, self.inputDevices[id - 1]), self.lang, None, self)
 
     def startListen(self):
         self.isLisStarted = True
-        thr1 = Thread(target=self.voskApi.startLis, args=())
+        thr1 = Thread(target=self.voskApi.startLisLive, args=())
         thr1.start()
+
+    def startListenFiles(self, mpres, res_sig):
+        self.isLisStarted = True
+        self.voskApi = VoskApi(0, self.lang, mpres, self)
+        self.voskApi.set_PathFiles(self.audioFiles)
+        self.voskApi.listenFiles()
+        res_sig.emit()
+
+    def checkFilesRes(self):
+        self.text_lyrics = self.textHandle(self.text_lyrics)
+        data = self.voskApi.get_saidFiles()
+        self.similarity = len(data)*[0]
+        for i in range(len(data)):
+            data[i] = self.textHandle(data[i])
+            self.similarity[i] = round(cpp_text_check.checkResult(data[i], self.text_lyrics)*10)
 
     def pauseListen(self):
         self.voskApi.pause()
+
+    def getSimilarity(self):
+        return self.similarity
 
     def resumeListen(self):
         self.voskApi.resume()
@@ -62,6 +94,3 @@ class Model(object):
         self.text_said = self.textHandle(self.text_said)
         self.text_lyrics = self.textHandle(self.text_lyrics)
         self.similarity = round(cpp_text_check.checkResult(self.text_said, self.text_lyrics)*10)
-
-    def getSimilarity(self):
-        return self.similarity
